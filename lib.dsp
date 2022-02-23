@@ -101,17 +101,4 @@ jo = environment {
 		'res = res, res + inc : select2(cntup <  steps);
 	};
 
-	/*
-		Simple line to (time in seconds)
-	*/
-	line(time, sig) = res
-	letrec {
-	    'changed = (sig' != sig) | (time' != time);
-	    'steps = ma.SR * time;
-	    'cntup = ba.countup(steps ,changed);
-	    'diff = ( sig - res);
-	    'inc = diff / steps : ba.sAndH(changed);
-	    'res = res, res + inc : select2(cntup <  steps);
-	};
-
 };
