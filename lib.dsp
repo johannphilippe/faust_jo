@@ -76,6 +76,9 @@ jo = environment {
 	*/
 	threshold(th, sig) = sig, 0 : select2(sig <= th);
 
+	/*
+		Capture movement on a signal - outputs signal between 0 and 1
+	*/
 	capture_mov(th, release_time, sig) = res
 	letrec {
 		'inc = (abs(sig' - sig)) : threshold(th);
@@ -83,6 +86,32 @@ jo = environment {
 		'dec =  (res / (release_time * ma.SR)) : *(-1) : ba.sAndH(is_moving);
 		'mv = dec, inc : select2(is_moving);
 		'res = _~+(mv) : range(0, 1);
+	};
+
+	/*
+		Linear interpolation of a signal
+	*/
+	line(time, sig) = res
+	letrec {
+		'changed = (sig' != sig) | (time' != time);
+		'steps = ma.SR * time;
+		'cntup = ba.countup(steps ,changed);  
+		'diff = ( sig - res);
+		'inc = diff / steps : ba.sAndH(changed);
+		'res = res, res + inc : select2(cntup <  steps);
+	};
+
+	/*
+		Simple line to (time in seconds)
+	*/
+	line(time, sig) = res
+	letrec {
+	    'changed = (sig' != sig) | (time' != time);
+	    'steps = ma.SR * time;
+	    'cntup = ba.countup(steps ,changed);
+	    'diff = ( sig - res);
+	    'inc = diff / steps : ba.sAndH(changed);
+	    'res = res, res + inc : select2(cntup <  steps);
 	};
 
 };
