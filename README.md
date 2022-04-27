@@ -1,2 +1,4 @@
 # faust_jo
-Custom Faust library
+
+Custom Faust utilities like euclidian rhythm, polyphonic pitch detection (...). 
+
