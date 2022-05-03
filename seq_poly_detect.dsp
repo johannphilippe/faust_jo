@@ -55,7 +55,7 @@ with {
         with {
             trig = amp : mpulse_dur(atq);
             env = trig : en.are(atq, rel);
-            itp_amp = amp : line(atq+rel);
+            itp_amp = amp : ba.sAndH(amp > 0) : line(0.1);
         };
 	// Filters the input signal, and calls RMS detection
         chain(note) = +(syn)
