@@ -96,3 +96,60 @@ letrec {
 	'res = res, res + inc : select2(cntup <  steps);
 };
 
+
+
+// In frequencies
+fq_to_bpm(fq) = 60 * fq;
+bpm_to_fq(bpm) = bpm / 60;
+metro(fq) = ba.beat(fq_to_bpm(fq));
+swingmetro_par(fq, swing) = m1, m2
+with {
+    m1 = metro(fq);
+    m2 = met
+    with {
+        sw = swing ; //range( 0, 1, swing);
+        ph = os.hs_phasor(1, fq, m1);
+        met = 0, 1 : select2(cond) : ba.impulsify
+        with {
+            cond = (ph >= sw) & (ph' <= sw);
+        };
+    };
+};
+swingmetro(fq,swing) = swingmetro_par(fq, swing) :> _;
+
+// Outputs triggers on first output, and velocity (normalized) on second 
+sequencer(t, freq) = (res > 0) * (ph != ph'), res
+with {
+    sz = t : _,!;
+    ph = int(os.phasor(sz, freq)); 
+    res = t, ph : rdtable;
+};
+
+// Can choose the number of steps to read
+step_sequencer(t, size, freq) = (res > 0) * (ph != ph'), res
+with {
+    ph = int(os.phasor(size, freq)); 
+    res = t, ph : rdtable;
+};
+
+// Tempo adjusts so each step is equivalent
+beat_sequencer(t, size, freq) = (res > 0) * (ph != ph'), res
+with {
+    ph = int(os.phasor(size, freq / size)); 
+    res = t, ph : rdtable;
+};
+
+ 
+// Tempo adjusts so each step is equivalent
+swing_sequencer(t,tswing, size, freq) = ((res > 0) * (ph != ph')) | swing, res
+with {
+    ph = int(os.phasor(size, freq / size));
+    sw = tswing, ph : rdtable; 
+    phstep = os.hs_phasor(1, freq, sw != sw');
+    swing = 0, 1 : select2(cond) : ba.impulsify
+    with {
+        cond = (phstep >= sw) & (phstep' <= sw);
+    };
+    
+    res = t, ph : rdtable;
+};
